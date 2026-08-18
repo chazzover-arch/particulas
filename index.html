@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>助詞練習 — Práctica de Partículas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #E8EAE6;
+    --paper-line: #cdd2cb;
+    --ink: #1B1B1B;
+    --ink-soft: #4a4d47;
+    --indigo: #23395B;
+    --indigo-soft: #3C5B7A;
+    --hanko: #B23A2E;
+    --hanko-dark: #8C2C22;
+    --card: #F5F4EF;
+    --ok: #2f6b4f;
+    --radius: 4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--paper-line) 39px, var(--paper-line) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--paper-line) 39px, var(--paper-line) 40px),
+      var(--paper);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 64px;
+  }
+  .wrap{ width:100%; max-width: 640px; }
+
+  header{ text-align:center; margin-bottom: 28px; }
+  header .kanji{
+    font-family:'Shippori Mincho', serif;
+    font-weight:800;
+    font-size: 44px;
+    color: var(--indigo);
+    letter-spacing: 0.08em;
+    margin: 0;
+    line-height:1;
+  }
+  header .sub{
+    margin-top:8px;
+    font-size:14px;
+    color: var(--ink-soft);
+    letter-spacing:0.02em;
+  }
+  header .sub b{ color: var(--indigo); }
+
+  nav.modes{
+    display:flex; gap:8px; justify-content:center; margin-bottom:26px; flex-wrap:wrap;
+  }
+  nav.modes button{
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    border: 1.5px solid var(--indigo);
+    background: transparent;
+    color: var(--indigo);
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  nav.modes button.active{
+    background: var(--indigo);
+    color: #fff;
+  }
+  nav.modes button:hover:not(.active){
+    background: rgba(35,57,91,0.08);
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid #d4d2c7;
+    border-radius: var(--radius);
+    padding: 36px 30px 28px;
+    position:relative;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px -12px rgba(35,57,91,0.18);
+    min-height: 320px;
+  }
+
+  .stats{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    border-bottom: 1px dashed #c7c4b7;
+    padding-bottom: 12px;
+  }
+  .stats .timer{ color: var(--hanko); font-weight:600; }
+  .stats .timer.hidden{ display:none; }
+
+  .sentence{
+    font-family:'Shippori Mincho', serif;
+    font-size: 28px;
+    line-height: 1.9;
+    text-align:center;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    word-break: keep-all;
+  }
+  .sentence .blank{
+    display:inline-block;
+    min-width: 46px;
+    border-bottom: 2.5px solid var(--indigo);
+    margin: 0 3px;
+    color: var(--indigo);
+    font-weight:700;
+  }
+  .sentence .blank.correct{ color: var(--ok); border-color: var(--ok); }
+  .sentence .blank.wrong{ color: var(--hanko); border-color: var(--hanko); }
+
+  .translation{
+    text-align:center;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+    min-height: 20px;
+    margin-bottom: 26px;
+  }
+
+  .options{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px,1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .options button{
+    font-family:'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight:700;
+    padding: 14px 6px;
+    border: 1.5px solid #b9b6a8;
+    background: #fff;
+    color: var(--indigo);
+    border-radius: var(--radius);
+    cursor:pointer;
+    transition: transform .1s ease, border-color .15s ease, background .15s ease;
+  }
+  .options button:hover:not(:disabled){
+    border-color: var(--indigo);
+    transform: translateY(-2px);
+  }
+  .options button:disabled{ cursor:default; }
+  .options button.pick-correct{
+    background: rgba(47,107,79,0.1);
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+  .options button.pick-wrong{
+    background: rgba(178,58,46,0.08);
+    border-color: var(--hanko);
+    color: var(--hanko-dark);
+  }
+
+  .note{
+    text-align:center; font-size: 12.5px; color: var(--ink-soft);
+    margin-top: 18px; min-height: 16px; line-height:1.5;
+  }
+
+  .next{
+    display:block; margin: 20px auto 0;
+    background: var(--indigo); color:#fff; border:none;
+    font-family:'Zen Kaku Gothic New', sans-serif; font-weight:700; font-size:13px;
+    padding: 11px 26px; border-radius: var(--radius); cursor:pointer;
+    opacity:0; pointer-events:none; transition: opacity .2s ease;
+  }
+  .next.show{ opacity:1; pointer-events:auto; }
+  .next:hover{ background: var(--indigo-soft); }
+
+  /* hanko stamp */
+  .hanko-stamp{
+    position:absolute;
+    top: 14px; right: 18px;
+    width: 74px; height: 74px;
+    border: 3.5px solid var(--hanko);
+    border-radius: 50%;
+    color: var(--hanko);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho', serif;
+    font-weight:800; font-size: 26px;
+    opacity: 0;
+    transform: scale(2.2) rotate(-16deg);
+    pointer-events:none;
+  }
+  .hanko-stamp.show{
+    animation: stampIn .38s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes stampIn{
+    0%{ opacity:0; transform: scale(2.4) rotate(-16deg); }
+    60%{ opacity:1; transform: scale(0.92) rotate(-10deg); }
+    100%{ opacity:0.92; transform: scale(1) rotate(-10deg); }
+  }
+
+  .end-screen{ text-align:center; padding: 20px 0; }
+  .end-screen .big{
+    font-family:'Shippori Mincho', serif;
+    font-size: 42px; color: var(--indigo); font-weight:800;
+  }
+  .end-screen .msg{ margin: 10px 0 26px; color: var(--ink-soft); font-size:14px; }
+  .end-screen button{
+    background: var(--indigo); color:#fff; border:none;
+    font-family:'Zen Kaku Gothic New', sans-serif; font-weight:700; font-size:13px;
+    padding: 12px 28px; border-radius: var(--radius); cursor:pointer;
+  }
+
+  footer{
+    margin-top: 30px; text-align:center; font-size:11.5px; color: var(--ink-soft);
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hanko-stamp.show{ animation:none; opacity:0.92; transform:scale(1) rotate(-10deg); }
+    .options button{ transition:none; }
+  }
+
+  @media (max-width: 480px){
+    header .kanji{ font-size:34px; }
+    .sentence{ font-size:22px; }
+    .card{ padding: 28px 18px 22px; }
+  }
+
+  button:focus-visible, .options button:focus-visible{
+    outline: 2.5px solid var(--hanko);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kanji">助詞練習</p>
+    <p class="sub">Práctica de partículas japonesas — vocabulario <b>Marugoto Nivel A1</b></p>
+  </header>
+
+  <nav class="modes">
+    <button data-mode="practice" class="active">練習 · Práctica</button>
+    <button data-mode="exam">試験 · Examen</button>
+    <button data-mode="timed">時間 · Contrarreloj</button>
+  </nav>
+
+  <div class="card" id="card">
+    <!-- injected by JS -->
+  </div>
+
+  <footer>正解 = correcto &nbsp;·&nbsp; 不正解 = incorrecto &nbsp;·&nbsp; 40 frases</footer>
+</div>
+
+<script>
+/* =========================================================
+   Banco de frases — vocabulario y estructuras del Nivel A1
+   de Marugoto (autopresentación, gustos, familia, rutina,
+   ciudad, compras, vacaciones).
+   ========================================================= */
+const BANK = [
+  // は - tema
+  { s:["わたし","___","ビセンテ・ロブレスです。"], a:"は", opts:["は","が","を","に"], t:"Yo soy Vicente Robles.", note:"「は」marca el tema de la frase: de qué o quién se habla." },
+  { s:["わたし","___","エンジニアです。"], a:"は", opts:["は","を","で","と"], t:"Yo soy ingeniero.", note:"「は」introduce el tema: 'yo'." },
+  { s:["ホラー","___","ぜんぜん　みません。"], a:"は", opts:["は","が","を","に"], t:"El terror no lo veo para nada.", note:"「は」marca contraste/tema: hablando del terror en concreto." },
+  { s:["わたしの　いえ","___","あたらしいです。"], a:"は", opts:["は","が","を","へ"], t:"Mi casa es nueva.", note:"Tema + adjetivo-な/い: 「Xは〜です」." },
+
+  // が - gustos / habilidad / existencia
+  { s:["クラシックえいが","___","すきです。"], a:"が", opts:["が","を","に","で"], t:"Me gustan las películas clásicas.", note:"Con「すきです」el objeto de gusto se marca con「が」, no「を」." },
+  { s:["にほんご","___","すこし　できます。"], a:"が", opts:["が","を","は","と"], t:"Puedo hablar un poco de japonés.", note:"Con「できます」(poder hacer) se usa「が」." },
+  { s:["SF","___","もすきです。"], a:"", opts:["が","を","に","で"], t:"", note:"", skip:true }, // placeholder removed below
+  { s:["いぬ","___","います。"], a:"が", opts:["が","を","に","で"], t:"Hay un perro. / Tengo un perro.", note:"Existencia de seres vivos:「が　います」." },
+  { s:["アニメ","___","すきです。"], a:"が", opts:["が","を","に","へ"], t:"Me gusta el anime.", note:"「すきです」pide「が」para lo que gusta." },
+
+  // を - objeto directo
+  { s:["えいが","___","みます。"], a:"を", opts:["を","が","に","で"], t:"Veo una película.", note:"「を」marca el objeto directo del verbo「みます」(ver)." },
+  { s:["「カサブランカ」","___","みました。"], a:"を", opts:["を","が","は","と"], t:"Vi 'Casablanca'.", note:"Objeto directo de「みました」(pasado de ver)." },
+  { s:["ほん","___","よみます。"], a:"を", opts:["を","が","に","で"], t:"Leo un libro.", note:"Objeto directo de「よみます」(leer)." },
+  { s:["かいもの","___","します。"], a:"を", opts:["を","が","に","へ"], t:"Hago compras.", note:"「Nを　します」= hacer N." },
+  { s:["にほんご","___","べんきょうします。"], a:"を", opts:["を","が","に","で"], t:"Estudio japonés.", note:"Objeto directo de「べんきょうします」." },
+
+  // に - tiempo / destino / existencia-lugar
+  { s:["７じ","___","おきます。"], a:"に", opts:["に","で","を","へ"], t:"Me levanto a las 7.", note:"「に」marca un punto en el tiempo." },
+  { s:["きょうと","___","いきたいです。"], a:"に", opts:["に","で","を","へ"], t:"Quiero ir a Kioto.", note:"「に」marca el destino con「いきます」(también se puede usar「へ」)." },
+  { s:["うち","___","かえります。"], a:"に", opts:["に","で","を","が"], t:"Vuelvo a casa.", note:"Destino de「かえります」(volver)." },
+  { s:["つくえの　うえ","___","ねこが　います。"], a:"に", opts:["に","で","を","は"], t:"Hay un gato encima de la mesa.", note:"「に」marca el lugar donde algo existe, con「います／あります」." },
+  { s:["まいにち　がっこう","___","いきます。"], a:"に", opts:["に","で","を","が"], t:"Voy a la escuela todos los días.", note:"「に」= destino del movimiento." },
+
+  // で - lugar de acción / medio
+  { s:["うち","___","えいがを　みます。"], a:"で", opts:["で","に","を","へ"], t:"Veo películas en casa.", note:"「で」marca el lugar donde ocurre la acción (no un simple estado)." },
+  { s:["でんしゃ","___","いきます。"], a:"で", opts:["で","に","を","が"], t:"Voy en tren.", note:"「で」marca el medio de transporte." },
+  { s:["としょかん","___","べんきょうします。"], a:"で", opts:["で","に","を","へ"], t:"Estudio en la biblioteca.", note:"「で」= lugar donde se realiza la acción." },
+  { s:["レストラン","___","たべます。"], a:"で", opts:["で","に","を","が"], t:"Como en el restaurante.", note:"Lugar de la acción「たべます」." },
+
+  // へ - dirección
+  { s:["きょうと","___","いきます。"], a:"へ", opts:["へ","を","が","で"], t:"Voy hacia Kioto.", note:"「へ」también marca dirección/destino (más literario que「に」)." },
+  { s:["がっこう","___","いきましょう。"], a:"へ", opts:["へ","を","が","で"], t:"Vayamos hacia la escuela.", note:"「へ」marca la dirección del movimiento." },
+
+  // と - y / con
+  { s:["パン","___","くだものを　たべます。"], a:"と", opts:["と","や","も","に"], t:"Como pan y fruta.", note:"「と」conecta sustantivos: 'A と B' = A y B (lista cerrada)." },
+  { s:["ともだち","___","えいがを　みます。"], a:"と", opts:["と","が","を","へ"], t:"Veo una película con un amigo.", note:"「と」= 'con' cuando acompaña a una persona." },
+  { s:["「バック・トゥ・ザ・フューチャー」","___","「プロジェクト：フィン・デル・ムンド」がすきです。"], a:"と", opts:["と","も","や","が"], t:"Me gustan 'Volver al futuro' y 'Proyecto fin del mundo'.", note:"「と」conecta los dos títulos de película." },
+
+  // も - también
+  { s:["アイアンマン","___","すきです。"], a:"も", opts:["も","は","が","を"], t:"Iron Man también me gusta.", note:"「も」= 'también', reemplaza a「は／が」cuando se añade algo similar." },
+  { s:["SF","___","すきです。"], a:"も", opts:["も","は","が","を"], t:"La ciencia ficción también me gusta.", note:"「も」añade otro elemento a la lista de gustos." },
+  { s:["にほんご","___","すこしできます。フランスご","___","すこしできます。"], a:"も", opts:["も","は","が","を"], t:"Puedo un poco de japonés. También un poco de francés.", note:"「も」repite la estructura para 'también'." },
+
+  // の - posesión / modificación
+  { s:["わたし","___","しゅみは　えいがです。"], a:"の", opts:["の","は","が","を"], t:"Mi pasatiempo son las películas.", note:"「の」conecta 'わたし' con 'しゅみ': posesión." },
+  { s:["すきな　えいが","___","「カサブランカ」です。"], a:"は", opts:["は","の","が","を"], t:"Mi película favorita es 'Casablanca'.", note:"Aquí「は」marca el tema (no「の」, que sería para posesión)." },
+  { s:["あに","___","こどもは　２さいです。"], a:"の", opts:["の","は","が","を"], t:"El hijo de mi hermano mayor tiene 2 años.", note:"「の」= posesión: 'de mi hermano'." },
+
+  // から〜まで
+  { s:["９じ","___","５じまで　はたらきます。"], a:"から", opts:["から","まで","に","で"], t:"Trabajo desde las 9 hasta las 5.", note:"「から」marca el punto de partida (tiempo o lugar)." },
+  { s:["げつようび","___","きんようびまで　がっこうです。"], a:"から", opts:["から","まで","に","を"], t:"Hay escuela de lunes a viernes.", note:"「から〜まで」= 'desde〜hasta'." },
+  { s:["くじから　ご","___",""], a:"じ", opts:["じ","まで","から","に"], t:"", note:"", skip:true },
+
+  // か - pregunta
+  { s:["すきな　えいがは　なんです","___",""], a:"か", opts:["か","の","ね","よ"], t:"¿Cuál es tu película favorita?", note:"「か」convierte la frase en pregunta." },
+  { s:["にほんごが　できます","___",""], a:"か", opts:["か","ね","よ","の"], t:"¿Puedes hablar japonés?", note:"「か」al final = partícula de pregunta." },
+
+  // más ejemplos mezclados de refuerzo
+  { s:["わたし","___","スポーツが　あまり　すきじゃないです。"], a:"は", opts:["は","が","を","に"], t:"A mí no me gusta mucho el deporte.", note:"「は」= tema; el objeto de (no)gustar sigue siendo「が」." },
+  { s:["えいが","___","みに　いきたいです。"], a:"を", opts:["を","が","に","で"], t:"Quiero ir a ver una película.", note:"「Vスタイル＋に　いきます」: el objeto de ver lleva「を」." },
+  { s:["うち","___","かえって、テレビを　みます。"], a:"に", opts:["に","で","を","へ"], t:"Vuelvo a casa y veo la tele.", note:"Destino de「かえります」= 「に」." },
+  { s:["きのう　パーティー","___","いきました。"], a:"に", opts:["に","で","を","が"], t:"Ayer fui a una fiesta.", note:"「に」= destino de「いきました」." },
+  { s:["ひろしま","___","とても　よかったです。"], a:"は", opts:["は","が","を","に"], t:"Hiroshima estuvo muy bien.", note:"「は」marca el tema de la valoración." },
+  { s:["おすし","___","おいしかったです。でも、たかかったです。"], a:"は", opts:["は","が","を","と"], t:"El sushi estaba rico. Pero era caro.", note:"「は」introduce el tema que se va a comentar." },
+].filter(x=>!x.skip);
+
+/* estado */
+let mode = 'practice';
+let queue = [];
+let idx = 0;
+let score = 0;
+let answered = false;
+let timerId = null;
+let timeLeft = 12;
+
+const card = document.getElementById('card');
+const modeButtons = document.querySelectorAll('nav.modes button');
+
+modeButtons.forEach(b=>{
+  b.addEventListener('click', ()=>{
+    modeButtons.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    mode = b.dataset.mode;
+    startRun();
+  });
+});
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startRun(){
+  queue = shuffle(BANK);
+  idx = 0;
+  score = 0;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  clearInterval(timerId);
+  if(idx >= queue.length){ renderEnd(); return; }
+  const q = queue[idx];
+  const optOrder = shuffle(q.opts);
+
+  card.innerHTML = `
+    <div class="hanko-stamp" id="stamp"></div>
+    <div class="stats">
+      <span>問題 ${idx+1} / ${queue.length}</span>
+      <span class="timer ${mode==='timed'?'':'hidden'}" id="timerLabel">⏱ ${timeLeft}s</span>
+      <span>正解 ${score}</span>
+    </div>
+    <div class="sentence" id="sentenceLine">
+      ${q.s[0]} <span class="blank" id="blankSpot">＿＿</span> ${q.s[2]}
+    </div>
+    <div class="translation" id="translation"></div>
+    <div class="options" id="options"></div>
+    <div class="note" id="noteLine"></div>
+    <button class="next" id="nextBtn">次へ　→</button>
+  `;
+
+  const optionsEl = document.getElementById('options');
+  optOrder.forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.addEventListener('click', ()=> pick(opt, q, btn));
+    optionsEl.appendChild(btn);
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    idx++;
+    renderQuestion();
+  });
+
+  if(mode === 'timed'){
+    timeLeft = 12;
+    document.getElementById('timerLabel').textContent = `⏱ ${timeLeft}s`;
+    timerId = setInterval(()=>{
+      timeLeft--;
+      const lbl = document.getElementById('timerLabel');
+      if(lbl) lbl.textContent = `⏱ ${timeLeft}s`;
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        if(!answered) pick(null, q, null);
+      }
+    }, 1000);
+  }
+}
+
+function pick(opt, q, btnEl){
+  if(answered) return;
+  answered = true;
+  clearInterval(timerId);
+
+  const correct = opt === q.a;
+  const blank = document.getElementById('blankSpot');
+  const allBtns = document.querySelectorAll('.options button');
+
+  blank.textContent = q.a;
+  blank.classList.add(correct ? 'correct' : 'wrong');
+
+  allBtns.forEach(b=>{
+    b.disabled = true;
+    if(b.textContent === q.a) b.classList.add('pick-correct');
+    else if(btnEl && b === btnEl) b.classList.add('pick-wrong');
+  });
+
+  document.getElementById('translation').textContent = q.t;
+  document.getElementById('noteLine').textContent = q.note;
+
+  const stamp = document.getElementById('stamp');
+  stamp.textContent = correct ? '正解' : '不正解';
+  stamp.classList.add('show');
+
+  if(correct) score++;
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function renderEnd(){
+  const pct = Math.round((score/queue.length)*100);
+  let msg;
+  if(pct === 100) msg = 'かんぺき！ Perfecto — dominas estas partículas.';
+  else if(pct >= 75) msg = 'よくできました。Muy buen resultado, sigue así.';
+  else if(pct >= 50) msg = 'もうすこし。Vas bien, repasa las que fallaste.';
+  else msg = 'がんばって。Practica un poco más y repite la ronda.';
+
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="big">${score} / ${queue.length}</div>
+      <div class="msg">${msg}</div>
+      <button id="restart">もういちど　·　Repetir</button>
+    </div>
+  `;
+  document.getElementById('restart').addEventListener('click', startRun);
+}
+
+startRun();
+</script>
+</body>
+</html>
